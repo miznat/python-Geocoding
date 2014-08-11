@@ -10,7 +10,7 @@ c = conn.cursor()
 
 #Create and Sqlite3 database to store the data
 
-c.execute("CREATE TABLE Restaurant (name text, address text, phone int, cuisine text, eatingOptions text, latitude int, longitude int)")
+c.execute("CREATE TABLE Restaurant (name text, address text, phone int, latitude int, longitude int)")
 
 names = []
 addresses = []
@@ -30,9 +30,7 @@ def getDataFromCSV(names,addresses,phoneNumbers,cuisines,eatingOptions):
 	    	names.append(row[0]) # takes a row from column 0 and adds it to 'name' array/list
 	     	addresses.append(row[1])
 	     	phoneNumbers.append(row[2])
-	     	cuisines.append(row[3])
-	     	eatingOptions.append(row[4])
-
+	     	
 
 def addPlusSignBetweenWords(name,address):
 
@@ -78,6 +76,24 @@ def addPlusSignBetweenWords(name,address):
 
 getDataFromCSV(names,addresses,phoneNumbers,cuisines,eatingOptions)
 
+
+for i in range(len(names)):
+
+	namePlusAddress = addPlusSignBetweenWords(names[i],addresses[i])
+
+	url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + namePlusAddress
+	makeCall = urlopen(url)
+	json_obj = load(makeCall)
+
+	for coordinates in json_obj['results']:
+		 latitude = coordinates['geometry']['location']['lat']
+		 longitude = coordinates['geometry']['location']['lng']
+	
+	
+	# Start saving in the database
+	c.execute("INSERT INTO Restaurant VALUES (?,?,?,?,?);",(names[i], addresses[i], phoneNumbers[i], latitude, longitude))
+	
+	conn.commit()
 
 
 
